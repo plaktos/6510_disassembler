@@ -15,6 +15,8 @@ struct FileHandle{
     FILE* file;
 };
 
+
+// Unsigned char array with RAII
 struct UCharArr{
     UCharArr(int s){
         arr = new unsigned char[s];
@@ -30,6 +32,7 @@ struct UCharArr{
     unsigned char* arr;
 };
 
+// Output formatting helper class
 class HexFormatter{
     public:
         HexFormatter(int p) : padby(p) {;}
@@ -38,6 +41,7 @@ class HexFormatter{
         int padby = 0;
 };
 
+// Output formatting helper class
 class OPCodeFormatter{
     public:
         OPCodeFormatter(std:: string a, std::string c, int b = 1, int cx = -1, int cy = -1)
@@ -82,18 +86,24 @@ void DisAss_6510(std::fstream& is, std::fstream& os){
     using namespace std ;
     size_t pc = 0; // program counter
 
+    // Find out the size of the input file
     is.seekg(0, ios::end);
     size_t buffsize = is.tellg();
     is.seekg(0, ios::beg);
+
+    // use the size to construct a buffer
     UCharArr buffer(buffsize + 1);
+
+    // and read into the buffer
     is.read((char*)buffer.arr, buffsize); buffer[buffsize] = '\0';
                         
-    // Peek the next op code and read bytes depending on which opcode it is
-    // The MOS 6510 only has instructions of size 1,2,3 bytes
-    // If peek returns 0 there is nothing to read anymore
     while(pc < buffsize){
-        unsigned char* currOPC = &buffer[pc];
+        // get the current opcode
+        unsigned char* currOPC = &buffer[pc]; 
         os << HexFormatter(4) << pc;
+        // Determine how many bytes to read based on opcode
+        // and print the command
+        // then increment the program counter by that much
         // First check  1 byte opcodes
         switch(*currOPC){
             case 0x00: os << OPCodeFormatter("imp","BRK"); pc++; break; // BReaK
@@ -251,7 +261,7 @@ void DisAss_6510(std::fstream& is, std::fstream& os){
             case 0xEE: os << OPCodeFormatter("abs","INC", 3, buffer[pc+1], buffer[pc+2]); pc=pc+3; break; // INCrement
             case 0xFE: os << OPCodeFormatter("abx","INC", 3, buffer[pc+1], buffer[pc+2]); pc=pc+3; break; // INCrement
             default:
-                       os << OPCodeFormatter("UNK", "UNK"); pc++; break;
+                       os << OPCodeFormatter("UNK", "UNK"); pc++; break; // Unknown command/ Illegal?? TODO
         }
         os << std::endl;
     }
