@@ -251,7 +251,7 @@ void DisAss_6510(std::fstream& is, std::fstream& os){
             case 0xEE: os << OPCodeFormatter("abs","INC", 3, buffer[pc+1], buffer[pc+2]); pc=pc+3; break; // INCrement
             case 0xFE: os << OPCodeFormatter("abx","INC", 3, buffer[pc+1], buffer[pc+2]); pc=pc+3; break; // INCrement
             default:
-                       os << OPCodeFormatter("UKN", "UNK"); pc++; break;
+                       os << OPCodeFormatter("UNK", "UNK"); pc++; break;
         }
         os << std::endl;
     }
